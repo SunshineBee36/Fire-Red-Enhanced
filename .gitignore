@@ -62,3 +62,23 @@ prefabs.json
 .vscode/*.*
 *.js
 *.sym
+# build artifacts
+/build/
+/bin/
+/obj/
+*.o
+*.elf
+*.gba
+*.gbag
+*.sym
+*.map
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
