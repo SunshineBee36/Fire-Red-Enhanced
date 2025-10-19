@@ -479,26 +479,9 @@ extern struct BattleStruct *gBattleStruct;
 #define MOVE_CATEGORY_SPECIAL  1
 #define MOVE_CATEGORY_STATUS   2
 
-// Devuelve true si el movimiento es físico
-static inline bool IsMovePhysical(u16 moveId)
-{
-    return gBattleMoves[moveId].category == MOVE_CATEGORY_PHYSICAL;
-}
-
-// Devuelve true si el movimiento es especial
-static inline bool IsMoveSpecial(u16 moveId)
-{
-    return gBattleMoves[moveId].category == MOVE_CATEGORY_SPECIAL;
-}
-
-// Obtiene el tipo del movimiento, considerando efectos dinámicos
-#define GET_MOVE_TYPE(move, typeArg)                                  \
-{                                                                     \
-    if (gBattleStruct->dynamicMoveType)                               \
-        typeArg = gBattleStruct->dynamicMoveType & DYNAMIC_TYPE_MASK; \
-    else                                                              \
-        typeArg = gBattleMoves[move].type;                            \
-}
+// Declaraciones de funciones para saber si un movimiento es físico o especial
+bool IsMovePhysical(u16 moveId);
+bool IsMoveSpecial(u16 moveId);
 
 #define TARGET_TURN_DAMAGED ((gSpecialStatuses[gBattlerTarget].physicalDmg != 0 || gSpecialStatuses[gBattlerTarget].specialDmg != 0))
 

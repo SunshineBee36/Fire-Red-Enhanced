@@ -1220,6 +1220,13 @@ static void Cmd_damagecalc(void)
         gBattleMoveDamage = gBattleMoveDamage * 15 / 10;
 
     gBattlescriptCurrInstr++;
+
+    #ifdef DEBUG_PHYSICAL_SPECIAL
+    if (gBattleMoves[gCurrentMove].category == MOVE_CATEGORY_PHYSICAL)
+        printf("DEBUG: %s es FISICO\n", gBattleMoves[gCurrentMove].name);
+    else if (gBattleMoves[gCurrentMove].category == MOVE_CATEGORY_SPECIAL)
+        printf("DEBUG: %s es ESPECIAL\n", gBattleMoves[gCurrentMove].name);
+#endif
 }
 
 void AI_CalcDmg(u8 attacker, u8 defender)
