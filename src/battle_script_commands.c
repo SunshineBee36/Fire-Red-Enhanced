@@ -1,4 +1,5 @@
 #include "global.h"
+#include "../include/battle.h"        // <- SOLO uno, antes de usar MOVE_CATEGORY_*
 #include "gflib.h"
 #include "item.h"
 #include "util.h"
@@ -18,7 +19,7 @@
 #include "party_menu.h"
 #include "trainer_pokemon_sprites.h"
 #include "field_specials.h"
-#include "battle.h"
+#include "pokemon.h"
 #include "battle_message.h"
 #include "battle_anim.h"
 #include "battle_ai_script_commands.h"
@@ -36,6 +37,10 @@
 #include "constants/abilities.h"
 #include "constants/pokemon.h"
 #include "constants/maps.h"
+#include "battle_moves.h"             // Struct + prototipos
+#include "data/battle_moves.h"        // Inicializadores de gBattleMoves[]
+#include "battle_message.h"
+#include "constants/battle_string_ids.h"
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
@@ -309,6 +314,9 @@ static void Cmd_removeattackerstatus1(void);
 static void Cmd_finishaction(void);
 static void Cmd_finishturn(void);
 
+static void Cmd_debugMoveType(void);
+
+
 void (* const gBattleScriptingCommandsTable[])(void) =
 {
     Cmd_attackcanceler,                          //0x0
@@ -559,6 +567,7 @@ void (* const gBattleScriptingCommandsTable[])(void) =
     Cmd_removeattackerstatus1,                   //0xF5
     Cmd_finishaction,                            //0xF6
     Cmd_finishturn,                              //0xF7
+    Cmd_debugMoveType,                           //0xF8
 };
 
 struct StatFractions
@@ -1070,7 +1079,7 @@ static void Cmd_accuracycheck(void)
             calc = (calc * 130) / 100; // 1.3 compound eyes boost
         if (WEATHER_HAS_EFFECT && gBattleMons[gBattlerTarget].ability == ABILITY_SAND_VEIL && gBattleWeather & B_WEATHER_SANDSTORM)
             calc = (calc * 80) / 100; // 1.2 sand veil loss
-        if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && if (gBattleMoves[gCurrentMove].category == MOVE_CATEGORY_PHYSICAL))
+        if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && gBattleMoves[gCurrentMove].category == DAMAGE_CATEGORY_PHYSICAL)
             calc = (calc * 80) / 100; // 1.2 hustle loss
 
         if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
@@ -1113,7 +1122,9 @@ static void Cmd_attackstring(void)
     if (!(gHitMarker & (HITMARKER_NO_ATTACKSTRING | HITMARKER_ATTACKSTRING_PRINTED)))
     {
         PrepareStringBattle(STRINGID_USEDMOVE, gBattlerAttacker);
+        //Cmd_debugMoveType();      // Muestra el tipo para debugging
         gHitMarker |= HITMARKER_ATTACKSTRING_PRINTED;
+        
     }
     gBattlescriptCurrInstr++;
     gBattleCommunication[MSG_DISPLAY] = 0;
@@ -1206,6 +1217,8 @@ static void Cmd_critcalc(void)
     gBattlescriptCurrInstr++;
 }
 
+
+
 static void Cmd_damagecalc(void)
 {
     u16 sideStatus = gSideStatuses[GET_BATTLER_SIDE(gBattlerTarget)];
@@ -1221,12 +1234,7 @@ static void Cmd_damagecalc(void)
 
     gBattlescriptCurrInstr++;
 
-    #ifdef DEBUG_PHYSICAL_SPECIAL
-    if (gBattleMoves[gCurrentMove].category == MOVE_CATEGORY_PHYSICAL)
-        printf("DEBUG: %s es FISICO\n", gBattleMoves[gCurrentMove].name);
-    else if (gBattleMoves[gCurrentMove].category == MOVE_CATEGORY_SPECIAL)
-        printf("DEBUG: %s es ESPECIAL\n", gBattleMoves[gCurrentMove].name);
-#endif
+
 }
 
 void AI_CalcDmg(u8 attacker, u8 defender)
@@ -1691,7 +1699,7 @@ static void Cmd_attackanimation(void)
         if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
         {
             gActiveBattler = gBattlerAttacker;
-
+            
             BtlController_EmitMoveAnimation(BUFFER_A, gCurrentMove, gBattleScripting.animTurn, gBattleMovePower, gBattleMoveDamage, gBattleMons[gBattlerAttacker].friendship, &gDisableStructs[gBattlerAttacker]);
             gBattleScripting.animTurn++;
             gBattleScripting.animTargetsHit++;
@@ -1829,7 +1837,7 @@ static void Cmd_datahpupdate(void)
                 if (!gSpecialStatuses[gActiveBattler].dmg && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                     gSpecialStatuses[gActiveBattler].dmg = gHpDealt;
 
-                if (gBattleMoves[gCurrentMove].category == MOVE_CATEGORY_PHYSICAL && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
+                if (gBattleMoves[gCurrentMove].category == DAMAGE_CATEGORY_PHYSICAL && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                 {
                     gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
                     gSpecialStatuses[gActiveBattler].physicalDmg = gHpDealt;
@@ -1844,7 +1852,7 @@ static void Cmd_datahpupdate(void)
                         gSpecialStatuses[gActiveBattler].physicalBattlerId = gBattlerTarget;
                     }
                 }
-                else if (gBattleMoves[gCurrentMove].category == MOVE_CATEGORY_SPECIAL && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
+                else if (gBattleMoves[gCurrentMove].category == DAMAGE_CATEGORY_SPECIAL && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                 {
                     gProtectStructs[gActiveBattler].specialDmg = gHpDealt;
                     gSpecialStatuses[gActiveBattler].specialDmg = gHpDealt;
@@ -9891,3 +9899,30 @@ static void Cmd_finishturn(void)
     gCurrentActionFuncId = B_ACTION_FINISHED;
     gCurrentTurnActionNumber = gBattlersCount;
 }
+
+
+
+
+static void Cmd_debugMoveType(void)
+{
+    u8 category = gBattleMoves[gCurrentMove].category;
+
+    switch (category)
+    {
+    case DAMAGE_CATEGORY_PHYSICAL:
+        PrepareStringBattle(STRINGID_PHYSICAL, gBattlerAttacker);
+        break;
+    case DAMAGE_CATEGORY_SPECIAL:
+        PrepareStringBattle(STRINGID_SPECIAL, gBattlerAttacker);
+        break;
+    case DAMAGE_CATEGORY_STATUS:
+    default:
+        PrepareStringBattle(STRINGID_STATUS, gBattlerAttacker);
+        break;
+    }
+
+}
+
+
+
+

@@ -384,8 +384,16 @@
 #define STRINGID_TRAINER1WINTEXT 383
 #define STRINGID_TRAINER1MON2COMEBACK 384
 #define STRINGID_TRAINER1MON1AND2COMEBACK 385
+#define STRINGID_PHYSICAL   386  // un ID libre
+#define STRINGID_SPECIAL    387
+#define STRINGID_STATUS    388
+ // DEBUG
 
-#define BATTLESTRINGS_COUNT     386
+
+
+#define BATTLESTRINGS_COUNT     389
+
+
 
 // This is the string id that gBattleStringsTable starts with.
 // String ids before this (e.g. STRINGID_INTROMSG) are not in the table,

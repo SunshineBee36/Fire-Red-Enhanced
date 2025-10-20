@@ -3250,3 +3250,21 @@ u8 IsMonDisobedient(void)
         }
     }
 }
+
+//Agregado para la nueva lógica de physical-special split
+
+#include "global.h"
+#include "battle.h"
+#include "battle_moves.h"
+
+// Devuelve true si el movimiento es físico
+u8 IsMovePhysical(u16 moveId)
+{
+    return gBattleMoves[moveId].category == DAMAGE_CATEGORY_PHYSICAL;
+}
+
+// Devuelve true si el movimiento es especial
+u8 IsMoveSpecial(u16 moveId)
+{
+    return gBattleMoves[moveId].category == DAMAGE_CATEGORY_SPECIAL;
+}

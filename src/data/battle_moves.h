@@ -1,3 +1,11 @@
+#ifndef DATA_BATTLE_MOVES_H
+#define DATA_BATTLE_MOVES_H
+
+#include "global.h"   // tipos básicos u8, u16
+#include "pokemon.h"  // struct BattleMove
+#include "battle.h"   // MOVE_CATEGORY_*
+#include "../../include/battle_moves.h"
+
 const struct BattleMove gBattleMoves[MOVES_COUNT] =
 {
     [MOVE_NONE] =
@@ -4970,3 +4978,6 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
         .category = DAMAGE_CATEGORY_SPECIAL, // auto generado para MOVE_PSYCHO_BOOST
     },
 };
+
+
+#endif // DATA_BATTLE_MOVES_H

@@ -474,14 +474,23 @@ extern struct BattleStruct *gBattleStruct;
 
 // --- Reemplazo del antiguo IS_TYPE_PHYSICAL / IS_TYPE_SPECIAL ---
 
+#ifndef GUARD_BATTLE_H
+#define GUARD_BATTLE_H
+
+#include "global.h"
+#include "battle_moves.h" // <-- Esto incluye tu struct BattleMove
+
 // Categorías de movimientos
 #define MOVE_CATEGORY_PHYSICAL 0
 #define MOVE_CATEGORY_SPECIAL  1
 #define MOVE_CATEGORY_STATUS   2
 
-// Declaraciones de funciones para saber si un movimiento es físico o especial
-bool IsMovePhysical(u16 moveId);
-bool IsMoveSpecial(u16 moveId);
+// Prototipos de funciones
+u8 IsMovePhysical(u16 moveId);
+u8 IsMoveSpecial(u16 moveId);
+
+#endif // GUARD_BATTLE_H
+
 
 #define TARGET_TURN_DAMAGED ((gSpecialStatuses[gBattlerTarget].physicalDmg != 0 || gSpecialStatuses[gBattlerTarget].specialDmg != 0))
 
